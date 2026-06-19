@@ -1,22 +1,38 @@
-# AuthDocChain SDK — Laravel Starter
+````markdown
+# AuthDocChain Laravel Starter
 
-A production-ready Laravel integration for the AuthDocChain SDK.
-Demonstrates certification, physical QR sealing, file-based verification,
-and paginated document listing — with zero file storage and no exposure
-of internal infrastructure.
+Production-ready Laravel integration for the AuthDocChain Protocol.
+
+This starter demonstrates certification, verification, QR sealing, and document management while preserving document integrity and privacy.
 
 ---
 
-## What this starter does
+## Features
 
-| Feature | How |
-|---|---|
-| **Certify a document** | Upload → integrity verified server-side → record created |
-| **Certify + QR seal** | Sealed PDF streamed directly to the user, never written to disk |
-| **Verify by upload** | Fingerprint computed on your server — file never sent to third parties |
-| **Verify by reference** | Paste a reference ID or fingerprint |
-| **List documents** | Paginated table, 15 per page |
-| **Dashboard + quota** | Live quota bar and account stats |
+| Feature | Description |
+|----------|-------------|
+| Document Certification | Certify documents through the AuthDocChain Protocol |
+| QR-Sealed PDFs | Generate certified PDFs with verification QR seals |
+| File Verification | Verify authenticity from uploaded files |
+| Reference Verification | Verify using a certification reference or fingerprint |
+| Document Listing | Paginated document management |
+| Dashboard & Quotas | Monitor usage and account limits |
+
+---
+
+## Protocol Compliance
+
+This starter follows the AuthDocChain Protocol specifications:
+
+- AIP-0001 — Document Certification
+- AIP-0002 — Hash Standard
+- AIP-0003 — QR Stamp Format
+
+For protocol details, see:
+
+- `/specs`
+- `/docs`
+- `/PROTOCOL.md`
 
 ---
 
@@ -25,85 +41,120 @@ of internal infrastructure.
 - PHP 8.1+
 - Composer
 - Laravel 10 or 11
-- AuthDocChain API key (Pro plan or higher)
+- AuthDocChain API Key
 
 ---
 
 ## Installation
 
 ```bash
-# 1. Create a new Laravel project
+# Create a new Laravel project
 composer create-project laravel/laravel my-app
+
 cd my-app
 
-# 2. Install Guzzle
+# Install HTTP client
 composer require guzzlehttp/guzzle
 
-# 3. Copy all files from this starter into the project
+# Copy starter files into the project
 
-# 4. Configure environment
+# Configure environment
 cp .env.example .env
 php artisan key:generate
 
-# 5. Set your API key
-# Edit .env → AUTHDOCCHAIN_API_KEY=adc_live_your_key
+# Add your API key
+AUTHDOCCHAIN_API_KEY=adc_live_your_key
 
-# 6. Start
+# Start the application
 php artisan serve
-```
+````
 
-Open http://localhost:8000
+Open:
 
----
-
-## Files
-
-```
-app/Services/AuthDocChainService.php      SDK wrapper
-app/Http/Controllers/DocumentController.php
-app/Http/Requests/CertifyRequest.php
-app/Http/Requests/VerifyRequest.php
-config/services.php
-routes/web.php
-resources/views/layouts/app.blade.php
-resources/views/documents/index.blade.php   Dashboard
-resources/views/documents/certify.blade.php Certify form
-resources/views/documents/result.blade.php  Certification result
-resources/views/documents/verify.blade.php  Verify (file upload or reference)
-resources/views/documents/list.blade.php    Paginated document list
+```text
+http://localhost:8000
 ```
 
 ---
 
-## Key design decisions
+## Project Structure
 
-**Zero file storage** — Certified PDFs are streamed directly from the API
-response to the browser. No file is written to disk on your server,
-consistent with AuthDocChain's zero-storage architecture.
-
-**Server-side fingerprinting** — When verifying by upload, the fingerprint
-is computed on your server (`hash('sha256', $content)`). The file itself
-never leaves your infrastructure.
-
-**No tech exposure** — The views show only what the user needs to see:
-name, institution, type, date, status. No internal references to the
-underlying stack are displayed.
+```text
+app/
+├── Services/
+│   └── AuthDocChainService.php
+│
+├── Http/
+│   ├── Controllers/
+│   │   └── DocumentController.php
+│   │
+│   └── Requests/
+│       ├── CertifyRequest.php
+│       └── VerifyRequest.php
+│
+config/
+└── services.php
+│
+routes/
+└── web.php
+│
+resources/
+└── views/
+    ├── layouts/
+    │   └── app.blade.php
+    │
+    └── documents/
+        ├── index.blade.php
+        ├── certify.blade.php
+        ├── result.blade.php
+        ├── verify.blade.php
+        └── list.blade.php
+```
 
 ---
 
-## Error codes
+## Security Principles
 
-| Code | Meaning |
-|---|---|
-| `400 HASH_MISMATCH` | File content doesn't match the provided fingerprint |
-| `400 ALREADY_STAMPED` | PDF was already sealed — use the original |
-| `400 ALREADY_CERTIFIED` | This document was already certified |
-| `400 QR_SIG_INVALID` | Seal was copied from another document |
-| `403` | API key doesn't have SDK access |
-| `429` | Rate limit exceeded (200 req/min) |
+### Zero Storage
+
+Certified PDF files are streamed directly to the browser and are never written to local storage.
+
+### Local Fingerprinting
+
+When verifying uploaded documents, fingerprints are generated locally using SHA-256 before interacting with the AuthDocChain API.
+
+### Tamper Detection
+
+QR seals are cryptographically linked to document fingerprints, preventing seal reuse and document substitution.
+
+---
+
+## Error Codes
+
+| Code              | Meaning                                                  |
+| ----------------- | -------------------------------------------------------- |
+| HASH_MISMATCH     | Document content does not match the expected fingerprint |
+| ALREADY_STAMPED   | Document already contains a certification seal           |
+| ALREADY_CERTIFIED | Document has already been certified                      |
+| QR_SIG_INVALID    | Verification seal validation failed                      |
+| UNAUTHORIZED      | Invalid API credentials                                  |
+| RATE_LIMITED      | Request quota exceeded                                   |
+
+---
+
+## Related Resources
+
+* PROTOCOL.md
+* WHITEPAPER.md
+* docs/architecture.md
+* docs/certification-flow.md
+* docs/verification-flow.md
 
 ---
 
 ## License
 
 MIT
+
+```
+```
